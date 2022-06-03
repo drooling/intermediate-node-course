@@ -1,30 +1,30 @@
-const express= require('express');
-const mongoose= require('mongoose');
-const bodyParser= require('body-parser');
-const port=8000;
-const app= express();
+const express = require('express');
+const mongoose = require('mongoose');
+const User = require("./models/User");
+const bodyParser = require('body-parser');
+const app = express();
 
 app.use(bodyParser.json());
+mongoose.connect('mongodb://localhost/userData')
 
-app.listen(port, ()=>{
-	console.log(`server is listening on port:${port}`)
+app.listen(80, () => {
+	console.log("Server listening -> ( http://locahost:80/ )")
 })
 
-// CREATE
-app.post('/users',(req,res)=>{
-  // User.create()
+app.post('/users', (req, res) => {
+	// User.create()
 })
 
 app.route('/users/:id')
-// READ
-.get((req,res)=>{
-  // User.findById()
+
+.get((req, res) => {
+	// User.findById()
 })
-// UPDATE
-.put((req,res)=>{
-  // User.findByIdAndUpdate()
+
+.put((req, res) => {
+	// User.findByIdAndUpdate()
 })
-// DELETE
-.delete((req,res)=>{
-  // User.findByIdAndDelete()
+
+.delete((req, res) => {
+	// User.findByIdAndDelete()
 })

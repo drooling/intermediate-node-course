@@ -26,7 +26,7 @@ app.post('/users', (req, res) => {
 			res.json({
 				success: false,
 				message: "Not Found"
-		})
+			})
 		} else {
 			res.json({
 				success: true,
@@ -39,31 +39,52 @@ app.post('/users', (req, res) => {
 
 app.route('/users/:id')
 
-.get((req, res) => {
-	User.findById(req.params.id, (err, data) => {
-		if (err) {
-			res.json({
-				success: false,
-				message: err
-			})
-		} else if (!data) {
-			res.json({
-				success: false,
-				message: "Not found"
-			})
-		} else {
-			res.json({
-				success: true,
-				message: data
-			})
-		}
+	.get((req, res) => {
+		User.findById(req.params.id, (err, data) => {
+			if (err) {
+				res.json({
+					success: false,
+					message: err
+				})
+			} else if (!data) {
+				res.json({
+					success: false,
+					message: "Not found"
+				})
+			} else {
+				res.json({
+					success: true,
+					message: data
+				})
+			}
+		})
 	})
-})
 
-.put((req, res) => {
-	// User.findByIdAndUpdate()
-})
+	.put((req, res) => {
+		User.findByIdAndUpdate(req.params.id, {
+			name: req.body.updated.name,
+			email: req.body.updated.email,
+			password: req.body.updated.password
+		}, { new: true }, (err, data) => {
+			if (err) {
+				res.json({
+					success: false,
+					message: err
+				})
+			} else if (!data) {
+				res.json({
+					success: false,
+					message: "Not found"
+				})
+			} else {
+				res.json({
+					success: true,
+					data: data
+				})
+			}
+		})
+	})
 
-.delete((req, res) => {
-	// User.findByIdAndDelete()
-})
+	.delete((req, res) => {
+		// User.findByIdAndDelete()
+	})

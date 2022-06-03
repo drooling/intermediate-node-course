@@ -1,6 +1,6 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const bcrypt = require("bcrypt");
 const User = require("./models/User");
 const bodyParser = require('body-parser');
 const app = express();
@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 mongoose.connect('mongodb://localhost/userData')
 
 app.listen(80, () => {
-	console.log("Server listening -> ( http://locahost:80/ )")
+	console.log("Server listening -> ( http://localhost:80/ )")
 })
 
 function buildResponse(res, err, data) {
@@ -32,13 +32,39 @@ function buildResponse(res, err, data) {
 }
 
 app.post('/users', (req, res) => {
-	bcrypt.genSalt(10, (err, salt) => {
-		bcrypt.hash(req.body.newUser.password, salt, (err, hash) => {
-			User.create({ ...res.body.newUser, password: (hash + ':' + salt) }, (err, data) => { buildResponse(res, err, data) })
-		});
+	bcrypt.hash(req.body.newUser.password, 10, (err, hash) => {
+		if (err) {
+			res.json({
+				success: false,
+				message: err
+			})
+		} else {
+			User.create({ ...req.body.newUser, password: hash }, (err, data) => { buildResponse(res, err, data) })
+		}
 	});
 })
 
+app.post("/login", (req, res) => {
+	User.findOne({ email: req.body.email }, (err, data) => {
+		if (err) {
+			res.send("<center><p>Something went wrong, oops !</p></center>")
+		} else if (!data) {
+			res.send("<center><p>That account doesn't exist</p></center>")
+		} else {
+			bcrypt.compare(req.body.password, data.password, (err, match) => {
+				if (err) {
+					res.send("<center><p>Something went wrong, oops !</p></center>")
+				} else {
+					if (match) {
+						res.send(`<center><p>Welcome ${data.name} !</p></center>`)
+					} else {
+						res.send("<center><p>Invalid credentials</p></center>")
+					}
+				}
+			});
+		}
+	})
+})
 
 app.route('/users/:id')
 
@@ -47,10 +73,15 @@ app.route('/users/:id')
 	})
 
 	.put((req, res) => {
-		bcrypt.genSalt(10, (err, salt) => {
-			bcrypt.hash(req.body.updated.password, salt, (err, hash) => {
-				User.findByIdAndUpdate(req.params.id, { ...req.body.update, password: (hash + ':' + salt)}, { new: true }, (err, data) => { buildResponse(res, err, data) })
-			});
+		bcrypt.hash(req.body.updated.password, 10, (err, hash) => {
+			if (err) {
+				res.json({
+					success: false,
+					message: err
+				})
+			} else {
+				User.findByIdAndUpdate(req.params.id, { ...req.body.update, password: hash }, { new: true }, (err, data) => { buildResponse(res, err, data) })
+			}
 		});
 	})
 

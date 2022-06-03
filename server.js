@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bcrypt = require("bcrypt");
 const User = require("./models/User");
 const bodyParser = require('body-parser');
 const app = express();
@@ -31,7 +32,11 @@ function buildResponse(res, err, data) {
 }
 
 app.post('/users', (req, res) => {
-	User.create({ ...res.body.newUser }, (err, data) => { buildResponse(res, err, data) })
+	bcrypt.genSalt(10, (err, salt) => {
+		bcrypt.hash(req.body.newUser.password, salt, (err, hash) => {
+			User.create({ ...res.body.newUser, password: (hash + ':' + salt) }, (err, data) => { buildResponse(res, err, data) })
+		});
+	});
 })
 
 
@@ -42,7 +47,11 @@ app.route('/users/:id')
 	})
 
 	.put((req, res) => {
-		User.findByIdAndUpdate(req.params.id, { ...req.body.updated }, { new: true }, (err, data) => { buildResponse(res, err, data) })
+		bcrypt.genSalt(10, (err, salt) => {
+			bcrypt.hash(req.body.updated.password, salt, (err, hash) => {
+				User.findByIdAndUpdate(req.params.id, { ...req.body.update, password: (hash + ':' + salt)}, { new: true }, (err, data) => { buildResponse(res, err, data) })
+			});
+		});
 	})
 
 	.delete((req, res) => {
